@@ -1,16 +1,84 @@
 version: 2.1
 
 orbs:
-  orb-tools: circleci/orb-tools@2.0.2
+  orb-tools: circleci/orb-tools@7.0.0
+
+jobs:
+  validate:
+    docker:
+      - image: circleci/circleci-cli
+    steps:
+      - checkout
+      - orb-tools/validate:
+          orb-path: "src/orb.yml"
+
+  smoke_test:
+    # c.f.
+    # https://github.com/uraway/circleci-ruby-orbs/blob/1.2.0/.circleci/config.yml#L75-L99
+    # https://github.com/CircleCI-Public/artifactory-orb/blob/39e72bee4c884eae0adde4c3204f0e18d727bc4b/.circleci/config.yml
+    docker:
+      - image: circleci/node
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints:
+            - 4a:55:21:29:9d:dd:01:cf:f4:c6:73:d0:0b:ab:03:5f
+      - run: ./.circleci/setup_smoke_test.sh
+
+      - run:
+          name: Poll for result
+          no_output_timeout: 5m
+          command: |
+            export SMOKE_BRANCH="smoke_test/${CIRCLE_SHA1}"
+            echo "Smoke test branch: https://github.com/uraway/node-orb-test/commits/${SMOKE_BRANCH}"
+            curl https://circleci.com/api/v1.1/project/github/uraway/node-orb-test/tree/${SMOKE_BRANCH}?limit=1 > build-result.json
+            BUILD_URL=$(cat build-result.json | jq -r '.[0].build_url')
+            echo "Monitoring Build: $BUILD_URL for status"
+            while true; do
+              curl https://circleci.com/api/v1.1/project/github/uraway/node-orb-test/tree/${SMOKE_BRANCH}?limit=1 > build-result.json
+              LIFECYCLE=$(cat build-result.json | jq -r '.[0].lifecycle')
+              if [ "$LIFECYCLE" == "finished" ];then
+                STATUS=$(cat build-result.json | jq -r '.[0].status')
+                if [ "$STATUS" == "success" ];then
+                  echo "Test project build successful."
+                  exit 0
+                else
+                  exit 1
+                fi
+              else
+                sleep 10
+              fi
+            done
 
 workflows:
   version: 2
 
   test_orb:
     jobs:
+      - orb-tools/lint
+
+      - orb-tools/pack:
+          attach-workspace: true
+          requires:
+            - orb-tools/lint
+
       - orb-tools/test-in-builds:
-          orb-location: src/helloworld/orb.yml
-          orb-name: helloworld
+          attach-workspace: true
+          workspace-root: .
+          orb-location: orb.yml
+          orb-name: node-orb
           test-steps:
             - orb-tools/local-test-build:
-                test-config-location: src/helloworld/test.yml
+                test-config-location: test/ci-yarn-upgrade_test.yml
+          requires:
+            - orb-tools/pack
+
+      - orb-tools/publish-dev:
+          sha-version-ref: "dev:${CIRCLE_SHA1}"
+          orb-name: "uraway/node-orb"
+          requires:
+            - orb-tools/pack
+
+      - smoke_test:
+          requires:
+            - orb-tools/publish-dev

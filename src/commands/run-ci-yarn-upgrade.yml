@@ -1,0 +1,8 @@
+description: |
+  Run ci-yarn-upgrade
+
+steps:
+  - run:
+      name: Run ci-yarn-upgrade
+      command: |
+        $(yarn global bin)/ci-yarn-upgrade --execute --verbose;

@@ -1,0 +1,8 @@
+description: |
+  Install ci-yarn-upgrade
+
+steps:
+  - run:
+      name: Install ci-yarn-upgrade
+      command: |
+        yarn global add ci-yarn-upgrade
