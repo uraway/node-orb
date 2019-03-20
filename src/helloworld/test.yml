@@ -1,8 +1,8 @@
 version: 2.1
 
 jobs:
-    build:
-        executor: hello-world/default
-        steps:
-            - hello-world/hello
-            - hello-world/world
+  build:
+    executor: helloworld/default
+    steps:
+      - helloworld/hello
+      - helloworld/world
