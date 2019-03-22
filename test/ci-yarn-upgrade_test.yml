@@ -1,0 +1,13 @@
+version: 2.1
+
+executors:
+  default:
+    docker:
+      - image: circleci/node
+
+workflows:
+  version: 2
+  test:
+    jobs:
+      - node-orb/ci-yarn-upgrade:
+          name: build

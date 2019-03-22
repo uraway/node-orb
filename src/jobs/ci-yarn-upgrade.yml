@@ -1,0 +1,9 @@
+description: "capsulize ci-yarn-upgrade<https://github.com/taichi/ci-yarn-upgrade>"
+
+docker:
+  - image: circleci/node
+
+steps:
+  - checkout
+  - install-ci-yarn-upgrade
+  - run-ci-yarn-upgrade
