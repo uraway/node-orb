@@ -87,7 +87,7 @@ workflows:
           orb-path: orb.yml
           orb-ref: uraway/node-orb
           segment: patch
-          publish-token-variable: CIRCLECI_API_TOKEN
+          publish-token-variable: CIRCLECI_TOKEN
           attach-workspace: true
           workspace-root: .
           checkout: false
