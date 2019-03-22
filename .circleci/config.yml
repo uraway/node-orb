@@ -89,8 +89,11 @@ workflows:
           segment: patch
           publish-token-variable: CIRCLECI_API_TOKEN
           attach-workspace: true
+          workspace-root: .
           checkout: false
-          requires: [orb-tools/test-in-builds]
+          requires:
+            - orb-tools/test-in-builds
+            - smoke_test
           filters:
             branches:
               only: master
