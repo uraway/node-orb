@@ -82,3 +82,15 @@ workflows:
       - smoke_test:
           requires:
             - orb-tools/publish-dev
+
+      - orb-tools/increment:
+          orb-path: orb.yml
+          orb-ref: uraway/node-orb
+          segment: patch
+          publish-token-variable: CIRCLECI_API_TOKEN
+          attach-workspace: true
+          checkout: false
+          requires: [orb-tools/test-in-builds]
+          filters:
+            branches:
+              only: master
