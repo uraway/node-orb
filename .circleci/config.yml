@@ -76,6 +76,7 @@ workflows:
       - orb-tools/publish-dev:
           sha-version-ref: "dev:${CIRCLE_SHA1}"
           orb-name: "uraway/node-orb"
+          publish-token-variable: CIRCLE_TOKEN
           requires:
             - orb-tools/pack
 
@@ -87,7 +88,7 @@ workflows:
           orb-path: orb.yml
           orb-ref: uraway/node-orb
           segment: patch
-          publish-token-variable: CIRCLECI_TOKEN
+          publish-token-variable: CIRCLE_TOKEN
           attach-workspace: true
           workspace-root: .
           checkout: false
