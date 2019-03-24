@@ -1,9 +1,41 @@
 description: "capsulize ci-yarn-upgrade<https://github.com/taichi/ci-yarn-upgrade>"
 
+parameters:
+  image:
+    type: string
+    default: circleci/node
+    description: >
+      Image contains `yarn`
+  git-user-name:
+    description: >
+      Name of the commit author
+    type: string
+    default: ${GIT_USER_NAME}
+  git-user-email:
+    description: >
+      Email of the commit author
+    type: string
+    default: ${GIT_USER_EMAIL}
+  arguments:
+    description: >
+      If you wish to pass any additional arguments to the ci-yarn-upgrade command (i.e. --verbose)
+    type: string
+    default: ""
+  github-token-variable:
+    description: >
+      Name of env var containing your token. Pass this as a raw string such
+      as GITHUB_ACCESS_TOKEN. Do not paste the actual token into your
+      configuration.
+    type: env_var_name
+    default: GITHUB_ACCESS_TOKEN
+
 docker:
-  - image: circleci/node
+  - image: "<< parameters.image >>"
 
 steps:
   - checkout
   - install-ci-yarn-upgrade
-  - run-ci-yarn-upgrade
+  - run-ci-yarn-upgrade:
+      git-user-name: << parameters.git-user-name >>
+      git-user-email: << parameters.git-user-email >>
+      github-token-variable: << parameters.github-token-variable >>
